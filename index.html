@@ -182,11 +182,23 @@ tbody tr.discarded{opacity:.45}
   font-weight:700;border:1px solid var(--line);background:var(--gray-bg);color:var(--muted);cursor:pointer;
   white-space:nowrap;transition:.15s;font-family:inherit}
 .status-btn:hover{border-color:var(--green);color:var(--green)}
+.status-btn.st-opl{background:var(--amber-bg);color:var(--amber);border-color:rgba(245,182,66,.35)}
 .status-btn.st-sent{background:rgba(38,198,218,.14);color:var(--accent);border-color:rgba(38,198,218,.35)}
 .status-btn.st-won{background:var(--green-soft);color:var(--green);border-color:rgba(46,230,160,.35)}
 .status-btn.st-lost{background:var(--red-bg);color:var(--red);border-color:rgba(255,107,107,.35)}
 .kpi.money .ico{background:rgba(38,198,218,.16);color:var(--accent)}
 .kpi.money .n{background:linear-gradient(90deg,#26c6da,#8fe4ff);-webkit-background-clip:text;background-clip:text;color:transparent}
+/* funil de conversao (dashboard privado) */
+.funnel{display:flex;align-items:stretch;gap:0;flex-wrap:wrap;background:var(--card);border:1px solid var(--line);
+  border-radius:16px;padding:18px 16px;box-shadow:var(--shadow-sm);margin:10px 0 4px}
+.funnel-step{flex:1 1 140px;min-width:120px;text-align:center;padding:6px 8px;position:relative}
+.funnel-step .n{font-size:26px;font-weight:800;letter-spacing:-.4px;color:var(--ink)}
+.funnel-step .l{font-size:11px;color:var(--muted);text-transform:uppercase;letter-spacing:.5px;font-weight:600;margin-top:4px}
+.funnel-arrow{flex:0 0 auto;display:flex;flex-direction:column;align-items:center;justify-content:center;
+  padding:0 10px;min-width:56px;color:var(--muted)}
+.funnel-arrow svg{width:16px;height:16px;color:var(--green)}
+.funnel-arrow .pct{font-size:12px;font-weight:700;color:var(--green);margin-top:2px}
+@media(max-width:720px){.funnel{flex-direction:column}.funnel-arrow{flex-direction:row;padding:4px 0}.funnel-arrow .pct{margin-top:0;margin-left:6px}}
 .status-modal{max-width:420px}
 .status-modal .field{margin-bottom:14px}
 .status-modal label{display:block;font-size:11px;color:var(--muted);text-transform:uppercase;letter-spacing:.5px;font-weight:600;margin-bottom:6px}
@@ -281,6 +293,7 @@ body{overflow-x:hidden}
   <div class="section-label">Overview</div>
   <div class="kpis" id="kpis"></div>
   <div class="section-label" id="successLabel" style="display:none">Commercial results</div>
+  <div class="funnel" id="funnel" style="display:none"></div>
   <div class="kpis" id="kpisSuccess" style="display:none"></div>
   <div class="section-label">Where to focus</div>
   <div class="maps-2">
@@ -368,10 +381,11 @@ if(META.private_metrics) COLS = COLS.concat(statusCol);
 let statusMap = {
   "https://example.com/demo-1": {"status":"sent","value":null,"updated_at":"2026-08-01T12:00:00Z","updated_by":"demo@bcg.com"},
   "https://example.com/demo-2": {"status":"won","value":210000,"updated_at":"2026-08-03T12:00:00Z","updated_by":"demo@bcg.com"},
-  "https://example.com/demo-3": {"status":"lost","value":null,"updated_at":"2026-08-04T12:00:00Z","updated_by":"demo@bcg.com"}
+  "https://example.com/demo-3": {"status":"lost","value":null,"updated_at":"2026-08-04T12:00:00Z","updated_by":"demo@bcg.com"},
+  "https://example.com/demo-4": {"status":"opl","value":null,"updated_at":"2026-08-05T12:00:00Z","updated_by":"demo@bcg.com"}
 }
 ;       // { [url]: {status, value, updated_at, updated_by} }
-const STATUS_LABEL = {sent:"Proposal sent", won:"Won", lost:"Lost"};
+const STATUS_LABEL = {opl:"In OPL", sent:"Proposal sent", won:"Won", lost:"Lost"};
 
 async function loadStatusMap(){
   if(!META.private_metrics) return;
@@ -637,27 +651,62 @@ function renderCardsInto(elId, cards, alreadyAnimated){
 // mudaria conforme alguem mexe num filtro de busca, o que confundiria
 // desempenho comercial de verdade com exploracao de dados.
 // ---------------------------------------------------------------------------
+// Estagios do funil, em ordem crescente de compromisso. Cada estagio inclui
+// as linhas de todos os estagios posteriores tambem (ex.: "won" conta tanto
+// pra "sent" quanto pra "opl"), porque na pratica ninguem marca os estagios
+// intermediarios retroativamente -- ir direto pra "won" ainda deve contar
+// como tendo passado por opl/sent.
+const FUNNEL_ORDER = ["opl","sent","won"]; // "lost" conta como decided, tratado a parte
+function stageAtLeast(r, stage){
+  const s = statusOf(r);
+  if(!s || !s.status) return false;
+  if(s.status==="lost") return stage==="opl" || stage==="sent"; // perdida passou por opl+sent, nunca "won"
+  const idx = FUNNEL_ORDER.indexOf(s.status);
+  const stageIdx = FUNNEL_ORDER.indexOf(stage);
+  return idx>=0 && idx>=stageIdx;
+}
+function isDecided(r){ const s=statusOf(r); return s && (s.status==="won"||s.status==="lost"); }
+
+const FUNNEL_ICON = S+'<path d="M3 4h18l-7 9v6l-4 2v-8z"/></svg>';
+
+function renderFunnel(){
+  const avancarRows = META.has_scoring ? DATA.filter(r=>actionBucket(r.action)==="avancar") : DATA;
+  const steps = [
+    {l:"Recommended",   n:avancarRows.length},
+    {l:"In OPL",         n:avancarRows.filter(r=>stageAtLeast(r,"opl")).length},
+    {l:"Proposal sent", n:avancarRows.filter(r=>stageAtLeast(r,"sent")).length},
+    {l:"Decided",        n:avancarRows.filter(isDecided).length},
+    {l:"Won",            n:avancarRows.filter(r=>{const s=statusOf(r); return s&&s.status==="won";}).length},
+  ];
+  const el = document.getElementById("funnel");
+  el.innerHTML = steps.map((step,i)=>{
+    const stepHtml = `<div class="funnel-step"><div class="n">${step.n}</div><div class="l">${esc(step.l)}</div></div>`;
+    if(i===steps.length-1) return stepHtml;
+    const next = steps[i+1];
+    const pct = step.n ? Math.round(100*next.n/step.n) : 0;
+    const arrow = `<div class="funnel-arrow">${FUNNEL_ICON}<div class="pct">${pct}%</div></div>`;
+    return stepHtml + arrow;
+  }).join("");
+}
+
 function renderSuccessKpis(){
   const label = document.getElementById("successLabel");
+  const funnelEl = document.getElementById("funnel");
   const grid = document.getElementById("kpisSuccess");
-  if(!META.private_metrics){ label.style.display="none"; grid.style.display="none"; return; }
-  label.style.display=""; grid.style.display="";
+  if(!META.private_metrics){ label.style.display="none"; funnelEl.style.display="none"; grid.style.display="none"; return; }
+  label.style.display=""; funnelEl.style.display=""; grid.style.display="";
+
+  renderFunnel();
 
   const avancarRows = META.has_scoring ? DATA.filter(r=>actionBucket(r.action)==="avancar") : DATA;
-  const withStatus = r => { const s=statusOf(r); return s && (s.status==="sent"||s.status==="won"||s.status==="lost"); };
-  const proposalsFromAvancar = avancarRows.filter(withStatus).length;
-  const conversion = avancarRows.length ? Math.round(100*proposalsFromAvancar/avancarRows.length) : 0;
-
-  const allProposals = DATA.filter(withStatus);
-  const decided = allProposals.filter(r=>{ const s=statusOf(r); return s.status==="won"||s.status==="lost"; });
+  const decided = avancarRows.filter(isDecided);
   const won = decided.filter(r=>statusOf(r).status==="won");
   const winRate = decided.length ? Math.round(100*won.length/decided.length) : 0;
   const totalWonValue = won.reduce((sum,r)=>sum+(statusOf(r).value||0), 0);
 
   const cards = [
-    {n:conversion,    l:"% pursue → proposal", cls:"selective", ico:SVG.scale, suffix:"%"},
-    {n:winRate,       l:"Win rate",             cls:"pursue",    ico:SVG.star,  suffix:"%"},
-    {n:totalWonValue, l:"Total value won (US$)", cls:"money",   ico:SVG.bank,  fmt:fmtUSD},
+    {n:winRate,       l:"Win rate (of decided)",  cls:"pursue", ico:SVG.star, suffix:"%"},
+    {n:totalWonValue, l:"Total value won (US$)",  cls:"money",  ico:SVG.bank, fmt:fmtUSD},
   ];
   renderCardsInto("kpisSuccess", cards, window.__successKpiAnimated);
   window.__successKpiAnimated = true;
@@ -801,7 +850,7 @@ document.addEventListener("keydown", e => { if(e.key==="Escape"){ closeModal(); 
 function renderStatusModal(url){
   const r = DATA.find(d=>d.url===url);
   const cur = statusMap[url] || {status:"", value:null};
-  const opts = [["","None"],["sent","Proposal sent"],["won","Won"],["lost","Lost"]];
+  const opts = [["","None"],["opl","In OPL"],["sent","Proposal sent"],["won","Won"],["lost","Lost"]];
   document.getElementById("statusModal").innerHTML = `
     <button class="close" onclick="closeStatusModal()">&times;</button>
     <h2 style="font-size:16px">${esc(r ? r.title : url)}</h2>
