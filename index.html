@@ -280,6 +280,8 @@ body{overflow-x:hidden}
   <div id="introBanner"></div>
   <div class="section-label">Overview</div>
   <div class="kpis" id="kpis"></div>
+  <div class="section-label" id="successLabel" style="display:none">Resultados comerciais</div>
+  <div class="kpis" id="kpisSuccess" style="display:none"></div>
   <div class="section-label">Where to focus</div>
   <div class="maps-2">
     <div class="card chart-card">
@@ -608,38 +610,57 @@ function renderKpis(rows){
   cards.push({n:new Set(rows.map(r=>r.country).filter(Boolean)).size, l:"Countries", cls:"", ico:SVG.pin});
   cards.push({n:new Set(rows.map(r=>r.source).filter(Boolean)).size, l:"Banks / MDBs", cls:"", ico:SVG.bank});
 
-  if(META.private_metrics){
-    // Universo p/ taxa de conversao: oportunidades que a IA marcou p/ avancar
-    // (sem scoring, nao ha "avancar" -- usamos todas as linhas visiveis).
-    const avancarRows = META.has_scoring ? rows.filter(r=>actionBucket(r.action)==="avancar") : rows;
-    const withStatus = r => { const s=statusOf(r); return s && (s.status==="sent"||s.status==="won"||s.status==="lost"); };
-    const proposalsFromAvancar = avancarRows.filter(withStatus).length;
-    const conversion = avancarRows.length ? Math.round(100*proposalsFromAvancar/avancarRows.length) : 0;
+  renderCardsInto("kpis", cards, window.__kpiAnimated);
+  window.__kpiAnimated = true;
+}
 
-    const allProposals = rows.filter(withStatus);
-    const decided = allProposals.filter(r=>{ const s=statusOf(r); return s.status==="won"||s.status==="lost"; });
-    const won = decided.filter(r=>statusOf(r).status==="won");
-    const winRate = decided.length ? Math.round(100*won.length/decided.length) : 0;
-    const totalWonValue = won.reduce((sum,r)=>sum+(statusOf(r).value||0), 0);
-
-    cards.push({n:conversion, l:"% avançar → proposta", cls:"selective", ico:SVG.scale, suffix:"%"});
-    cards.push({n:winRate,    l:"Taxa de vitória", cls:"pursue", ico:SVG.star, suffix:"%"});
-    cards.push({n:totalWonValue, l:"Valor total ganho (US$)", cls:"money", ico:SVG.bank, fmt:fmtUSD});
-  }
-
-  const kpisEl = document.getElementById("kpis");
-  kpisEl.innerHTML = cards.map(c=>{
-    const shown = c.fmt ? c.fmt(window.__kpiAnimated?c.n:0) : (window.__kpiAnimated?c.n:0)+(c.suffix||"");
+function renderCardsInto(elId, cards, alreadyAnimated){
+  const el = document.getElementById(elId);
+  el.innerHTML = cards.map(c=>{
+    const shown = c.fmt ? c.fmt(alreadyAnimated?c.n:0) : (alreadyAnimated?c.n:0)+(c.suffix||"");
     return `<div class="kpi ${c.cls}"><div class="ico">${c.ico||""}</div><div class="n" data-to="${c.n}" data-suffix="${c.suffix||""}" data-fmt="${c.fmt?"1":""}">${shown}</div><div class="l">${c.l}</div></div>`;
   }).join("");
-  if(!window.__kpiAnimated){
-    kpisEl.querySelectorAll(".n").forEach(el=>{
-      const to = +el.dataset.to, suffix = el.dataset.suffix||"";
-      if(el.dataset.fmt){ el.textContent = fmtUSD(to); }
-      else animateNum(el, to, suffix);
+  if(!alreadyAnimated){
+    el.querySelectorAll(".n").forEach(node=>{
+      const to = +node.dataset.to, suffix = node.dataset.suffix||"";
+      if(node.dataset.fmt){ node.textContent = fmtUSD(to); }
+      else animateNum(node, to, suffix);
     });
-    window.__kpiAnimated = true;
   }
+}
+
+// ---------------------------------------------------------------------------
+// KPIs de RESULTADO COMERCIAL (SO dashboard privado) -- secao propria,
+// separada do "Overview" de exploracao do pipeline. Importante: calculados
+// SEMPRE sobre a base COMPLETA (DATA), nunca sobre `rows` (que ja passou
+// pelos filtros de busca/pais/budget da tabela) -- senao a "taxa de vitoria"
+// mudaria conforme alguem mexe num filtro de busca, o que confundiria
+// desempenho comercial de verdade com exploracao de dados.
+// ---------------------------------------------------------------------------
+function renderSuccessKpis(){
+  const label = document.getElementById("successLabel");
+  const grid = document.getElementById("kpisSuccess");
+  if(!META.private_metrics){ label.style.display="none"; grid.style.display="none"; return; }
+  label.style.display=""; grid.style.display="";
+
+  const avancarRows = META.has_scoring ? DATA.filter(r=>actionBucket(r.action)==="avancar") : DATA;
+  const withStatus = r => { const s=statusOf(r); return s && (s.status==="sent"||s.status==="won"||s.status==="lost"); };
+  const proposalsFromAvancar = avancarRows.filter(withStatus).length;
+  const conversion = avancarRows.length ? Math.round(100*proposalsFromAvancar/avancarRows.length) : 0;
+
+  const allProposals = DATA.filter(withStatus);
+  const decided = allProposals.filter(r=>{ const s=statusOf(r); return s.status==="won"||s.status==="lost"; });
+  const won = decided.filter(r=>statusOf(r).status==="won");
+  const winRate = decided.length ? Math.round(100*won.length/decided.length) : 0;
+  const totalWonValue = won.reduce((sum,r)=>sum+(statusOf(r).value||0), 0);
+
+  const cards = [
+    {n:conversion,    l:"% avançar → proposta", cls:"selective", ico:SVG.scale, suffix:"%"},
+    {n:winRate,       l:"Taxa de vitória",       cls:"pursue",    ico:SVG.star,  suffix:"%"},
+    {n:totalWonValue, l:"Valor total ganho (US$)", cls:"money",  ico:SVG.bank,  fmt:fmtUSD},
+  ];
+  renderCardsInto("kpisSuccess", cards, window.__successKpiAnimated);
+  window.__successKpiAnimated = true;
 }
 
 function isGood(r){
@@ -726,6 +747,7 @@ function render(){
   renderHead();
   renderIntro(rows);
   renderKpis(rows);
+  renderSuccessKpis();
   document.getElementById("countLine").textContent =
     `Showing ${rows.length} of ${DATA.length} opportunities`;
   renderMaps(rows); renderBar(rows);
