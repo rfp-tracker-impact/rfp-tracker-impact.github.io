@@ -280,7 +280,7 @@ body{overflow-x:hidden}
   <div id="introBanner"></div>
   <div class="section-label">Overview</div>
   <div class="kpis" id="kpis"></div>
-  <div class="section-label" id="successLabel" style="display:none">Resultados comerciais</div>
+  <div class="section-label" id="successLabel" style="display:none">Commercial results</div>
   <div class="kpis" id="kpisSuccess" style="display:none"></div>
   <div class="section-label">Where to focus</div>
   <div class="maps-2">
@@ -292,7 +292,7 @@ body{overflow-x:hidden}
     <div class="card chart-card">
       <div class="chart-head"><h3 id="map2Title">Where the relevant money is (US$)</h3></div>
       <div id="map2" class="chart map"></div>
-      <div class="hint" id="map2Hint">Total budget of the <b>relevant</b> opportunities (those the AI flags as "para avançar / investigar"). Updates with filters.</div>
+      <div class="hint" id="map2Hint">Total budget of the <b>relevant</b> opportunities (those the AI flags as "pursue / investigate"). Updates with filters.</div>
     </div>
   </div>
   <div class="hint" style="margin:-6px 2px 0">"Regional" / "Caribbean" items don't appear on the maps (no single country), but are counted in the KPIs and the banks chart.</div>
@@ -330,15 +330,15 @@ body{overflow-x:hidden}
 
 <script>
 const DATA = [
-  {"source":"IDB (exemplo)","country":"El Salvador","title":"[EXEMPLO] Diagnóstico Estratégico e Plano Diretor de Resíduos Sólidos","project":"Programa ilustrativo","sector":"solid waste","deadline_iso":"2026-08-20","deadline":"20 Aug 2026","budget":"US$ 190,000","budget_val":190000,"currency":"USD","duration":"12 months","url":"https://example.com/demo-1","status":"","score":8.5,"relevance":"High","action":"Avançar","scope":"[Dado de demonstração] Diagnóstico e master plan regional de resíduos sólidos — histórico comparável em projetos de governo."},
-  {"source":"World Bank (exemplo)","country":"Regional","title":"[EXEMPLO] Estratégia Nacional de Saneamento e Marco Regulatório","project":"Programa ilustrativo","sector":"water & sanitation","deadline_iso":"2026-08-27","deadline":"27 Aug 2026","budget":"US$ 220,000","budget_val":220000,"currency":"USD","duration":"8 months","url":"https://example.com/demo-2","status":"","score":9.1,"relevance":"High","action":"Avançar","scope":"[Dado de demonstração] Desenho de carta constitutiva e marco regulatório para autoridade de saneamento."},
-  {"source":"IDB (exemplo)","country":"El Salvador","title":"[EXEMPLO] Estratégia de Atração de IED para o Setor Turístico","project":"Programa ilustrativo","sector":"tourism / FDI","deadline_iso":"2026-08-10","deadline":"10 Aug 2026","budget":"não informado","budget_val":null,"currency":"","duration":"","url":"https://example.com/demo-3","status":"","score":7.8,"relevance":"High","action":"Avançar","scope":"[Dado de demonstração] Estratégia de atração de investimento estrangeiro direto para o setor hoteleiro."},
-  {"source":"World Bank (exemplo)","country":"El Salvador","title":"[EXEMPLO] Revisão da Qualidade de Ativos — Banco de Desenvolvimento","project":"Programa ilustrativo","sector":"financial institutions","deadline_iso":"2026-08-13","deadline":"13 Aug 2026","budget":"não informado","budget_val":null,"currency":"","duration":"","url":"https://example.com/demo-4","status":"","score":8.0,"relevance":"High","action":"Avançar","scope":"[Dado de demonstração] Asset quality review para instituição financeira de desenvolvimento."},
-  {"source":"BNDES (exemplo)","country":"Brasil","title":"[EXEMPLO] Modernização de Empresa Estatal — Diagnóstico de Governança","project":"Programa ilustrativo","sector":"state-owned enterprise","deadline_iso":"2026-08-09","deadline":"09 Aug 2026","budget":"não informado","budget_val":null,"currency":"","duration":"","url":"https://example.com/demo-5","status":"","score":6.2,"relevance":"Medium","action":"Investigar","scope":"[Dado de demonstração] Diagnóstico de modelo de negócio, governança e estrutura organizacional de estatal."},
-  {"source":"IDB (exemplo)","country":"St Kitts and Nevis","title":"[EXEMPLO] Capacidade Institucional e Governança Ambiental","project":"Programa ilustrativo","sector":"environment","deadline_iso":"2026-08-11","deadline":"11 Aug 2026","budget":"US$ 60,000","budget_val":60000,"currency":"USD","duration":"18 months","url":"https://example.com/demo-6","status":"","score":6.0,"relevance":"Medium","action":"Investigar","scope":"[Dado de demonstração] Design de conselho ambiental nacional e diálogos de política."}
+  {"source":"IDB (sample)","country":"El Salvador","title":"[SAMPLE] Strategic Diagnosis and Master Plan for Solid Waste Management","project":"Illustrative program","sector":"solid waste","deadline_iso":"2026-08-20","deadline":"20 Aug 2026","budget":"US$ 190,000","budget_val":190000,"currency":"USD","duration":"12 months","url":"https://example.com/demo-1","status":"","score":8.5,"relevance":"High","action":"Pursue","scope":"[Sample data] Regional solid waste diagnosis and master plan — comparable track record on government projects."},
+  {"source":"World Bank (sample)","country":"Regional","title":"[SAMPLE] National Sanitation Strategy and Regulatory Framework","project":"Illustrative program","sector":"water & sanitation","deadline_iso":"2026-08-27","deadline":"27 Aug 2026","budget":"US$ 220,000","budget_val":220000,"currency":"USD","duration":"8 months","url":"https://example.com/demo-2","status":"","score":9.1,"relevance":"High","action":"Pursue","scope":"[Sample data] Charter and regulatory framework design for a sanitation authority."},
+  {"source":"IDB (sample)","country":"El Salvador","title":"[SAMPLE] FDI Attraction Strategy for the Tourism Sector","project":"Illustrative program","sector":"tourism / FDI","deadline_iso":"2026-08-10","deadline":"10 Aug 2026","budget":"not informed","budget_val":null,"currency":"","duration":"","url":"https://example.com/demo-3","status":"","score":7.8,"relevance":"High","action":"Pursue","scope":"[Sample data] Foreign direct investment attraction strategy for the hotel sector."},
+  {"source":"World Bank (sample)","country":"El Salvador","title":"[SAMPLE] Asset Quality Review — Development Bank","project":"Illustrative program","sector":"financial institutions","deadline_iso":"2026-08-13","deadline":"13 Aug 2026","budget":"not informed","budget_val":null,"currency":"","duration":"","url":"https://example.com/demo-4","status":"","score":8.0,"relevance":"High","action":"Pursue","scope":"[Sample data] Asset quality review for a development finance institution."},
+  {"source":"BNDES (sample)","country":"Brazil","title":"[SAMPLE] State-Owned Enterprise Modernization — Governance Diagnosis","project":"Illustrative program","sector":"state-owned enterprise","deadline_iso":"2026-08-09","deadline":"09 Aug 2026","budget":"not informed","budget_val":null,"currency":"","duration":"","url":"https://example.com/demo-5","status":"","score":6.2,"relevance":"Medium","action":"Investigate","scope":"[Sample data] Business model, governance and organizational structure diagnosis for a state-owned company."},
+  {"source":"IDB (sample)","country":"St Kitts and Nevis","title":"[SAMPLE] Institutional Capacity and Environmental Governance","project":"Illustrative program","sector":"environment","deadline_iso":"2026-08-11","deadline":"11 Aug 2026","budget":"US$ 60,000","budget_val":60000,"currency":"USD","duration":"18 months","url":"https://example.com/demo-6","status":"","score":6.0,"relevance":"Medium","action":"Investigate","scope":"[Sample data] National environmental council design and policy dialogues."}
 ]
 ;
-const META = {"generated":"DEMO — dados de exemplo","source_file":"demo_metrics_preview.xlsx","has_scoring":true,"count":6,"private_metrics":true}
+const META = {"generated":"DEMO — sample data","source_file":"demo_metrics_preview.xlsx","has_scoring":true,"count":6,"private_metrics":true}
 ;
 
 const baseCols = [
@@ -371,7 +371,7 @@ let statusMap = {
   "https://example.com/demo-3": {"status":"lost","value":null,"updated_at":"2026-08-04T12:00:00Z","updated_by":"demo@bcg.com"}
 }
 ;       // { [url]: {status, value, updated_at, updated_by} }
-const STATUS_LABEL = {sent:"Proposta enviada", won:"Ganha", lost:"Perdida"};
+const STATUS_LABEL = {sent:"Proposal sent", won:"Won", lost:"Lost"};
 
 async function loadStatusMap(){
   if(!META.private_metrics) return;
@@ -387,7 +387,7 @@ function statusOf(r){ return r.url ? (statusMap[r.url] || null) : null; }
 function statusButtonCell(r){
   const s = statusOf(r);
   const cls = s ? `st-${s.status}` : "";
-  const label = s ? STATUS_LABEL[s.status] : "Proposta feita?";
+  const label = s ? STATUS_LABEL[s.status] : "Proposal made?";
   return `<button type="button" class="status-btn ${cls}" data-url="${esc(r.url)}">${esc(label)}</button>`;
 }
 
@@ -541,18 +541,18 @@ function renderIntro(rows){
     const m = rows.filter(r=>actionBucket(r.action)==="monitorar").length;
     const d = rows.filter(r=>actionBucket(r.action)==="" && (r.action||"").toLowerCase().includes("descartar")).length;
     const total = rows.length;
-    x = `<b>${total} oportunidades</b> de <b>${nFonte} fontes</b> em <b>${nPais} países</b> — priorizadas pelo Claude em ${esc(META.generated)}.`
-      + `<br><span class="pill pursue">▲ ${a} para avançar</span>`
-      + `<span class="pill selective">● ${i} para investigar</span>`
-      + `<span class="pill drop">◎ ${m} para monitorar</span>`
-      + (d > 0 ? `<span class="pill disc">✕ ${d} descartadas</span>` : ``);
+    x = `<b>${total} opportunities</b> from <b>${nFonte} sources</b> in <b>${nPais} countries</b> — prioritized by Claude on ${esc(META.generated)}.`
+      + `<br><span class="pill pursue">▲ ${a} to pursue</span>`
+      + `<span class="pill selective">● ${i} to investigate</span>`
+      + `<span class="pill drop">◎ ${m} to monitor</span>`
+      + (d > 0 ? `<span class="pill disc">✕ ${d} discarded</span>` : ``);
 
-    // Lista as oportunidades acionaveis (avancar/investigar/monitorar) direto
-    // no banner -- nao so a contagem. Descartar nunca aparece aqui.
+    // Lists the actionable opportunities (pursue/investigate/monitor) right in
+    // the banner -- not just the count. Discarded never shows up here.
     const buckets = [
-      {key:"avancar",    cls:"pursue",    label:"Para avançar"},
-      {key:"investigar", cls:"selective", label:"Para investigar"},
-      {key:"monitorar",  cls:"drop",      label:"Para monitorar"},
+      {key:"avancar",    cls:"pursue",    label:"Pursue"},
+      {key:"investigar", cls:"selective", label:"Investigate"},
+      {key:"monitorar",  cls:"drop",      label:"Monitor"},
     ];
     const items = [];
     for(const b of buckets){
@@ -572,16 +572,16 @@ function renderIntro(rows){
     if(items.length){
       const remaining = (a+i+m) - items.length;
       list = `<div class="week-opp-list">${items.join("")}</div>`
-        + (remaining > 0 ? `<div class="week-opp-more">+ ${remaining} outra(s) — veja a tabela completa abaixo.</div>` : ``);
+        + (remaining > 0 ? `<div class="week-opp-more">+ ${remaining} more — see the full table below.</div>` : ``);
     }
   } else {
-    x = `<b>${rows.length} oportunidades</b> em <b>${nPais} países</b> de <b>${nFonte} fontes</b>`
-      + ` — coletadas em ${esc(META.generated)}.`
-      + ` <span style="opacity:.7">Priorização pelo Claude disponível após rodar o pipeline completo.</span>`;
+    x = `<b>${rows.length} opportunities</b> in <b>${nPais} countries</b> from <b>${nFonte} sources</b>`
+      + ` — collected on ${esc(META.generated)}.`
+      + ` <span style="opacity:.7">AI prioritization available after running the full pipeline.</span>`;
   }
   el.innerHTML =
     `<div class="intro-banner">
-       <div class="t">Oportunidades da semana</div>
+       <div class="t">This week's opportunities</div>
        <div class="x">${x}</div>
        ${list}
      </div>`;
@@ -603,9 +603,9 @@ function renderKpis(rows){
   cards.push({n:rows.length, l:"Opportunities", cls:"", ico:SVG.list});
   if(META.has_scoring){
     const cnt = b => rows.filter(r=>actionBucket(r.action)===b).length;
-    cards.push({n:cnt("avancar"),    l:"Para avançar", cls:"pursue", ico:SVG.target});
-    cards.push({n:cnt("investigar"), l:"Para investigar", cls:"selective", ico:SVG.scale});
-    cards.push({n:cnt("monitorar"),  l:"Para monitorar", cls:"drop", ico:SVG.x});
+    cards.push({n:cnt("avancar"),    l:"Pursue", cls:"pursue", ico:SVG.target});
+    cards.push({n:cnt("investigar"), l:"Investigate", cls:"selective", ico:SVG.scale});
+    cards.push({n:cnt("monitorar"),  l:"Monitor", cls:"drop", ico:SVG.x});
   }
   cards.push({n:new Set(rows.map(r=>r.country).filter(Boolean)).size, l:"Countries", cls:"", ico:SVG.pin});
   cards.push({n:new Set(rows.map(r=>r.source).filter(Boolean)).size, l:"Banks / MDBs", cls:"", ico:SVG.bank});
@@ -655,9 +655,9 @@ function renderSuccessKpis(){
   const totalWonValue = won.reduce((sum,r)=>sum+(statusOf(r).value||0), 0);
 
   const cards = [
-    {n:conversion,    l:"% avançar → proposta", cls:"selective", ico:SVG.scale, suffix:"%"},
-    {n:winRate,       l:"Taxa de vitória",       cls:"pursue",    ico:SVG.star,  suffix:"%"},
-    {n:totalWonValue, l:"Valor total ganho (US$)", cls:"money",  ico:SVG.bank,  fmt:fmtUSD},
+    {n:conversion,    l:"% pursue → proposal", cls:"selective", ico:SVG.scale, suffix:"%"},
+    {n:winRate,       l:"Win rate",             cls:"pursue",    ico:SVG.star,  suffix:"%"},
+    {n:totalWonValue, l:"Total value won (US$)", cls:"money",   ico:SVG.bank,  fmt:fmtUSD},
   ];
   renderCardsInto("kpisSuccess", cards, window.__successKpiAnimated);
   window.__successKpiAnimated = true;
@@ -801,21 +801,21 @@ document.addEventListener("keydown", e => { if(e.key==="Escape"){ closeModal(); 
 function renderStatusModal(url){
   const r = DATA.find(d=>d.url===url);
   const cur = statusMap[url] || {status:"", value:null};
-  const opts = [["","Nenhuma"],["sent","Proposta enviada"],["won","Ganha"],["lost","Perdida"]];
+  const opts = [["","None"],["sent","Proposal sent"],["won","Won"],["lost","Lost"]];
   document.getElementById("statusModal").innerHTML = `
     <button class="close" onclick="closeStatusModal()">&times;</button>
     <h2 style="font-size:16px">${esc(r ? r.title : url)}</h2>
     <div class="field" style="margin-top:16px">
-      <label>Status da proposta</label>
+      <label>Proposal status</label>
       <select id="stStatus">${opts.map(([v,l])=>`<option value="${v}" ${v===cur.status?"selected":""}>${l}</option>`).join("")}</select>
     </div>
     <div class="field" id="stValueField" style="display:${cur.status==="won"?"block":"none"}">
-      <label>Valor ganho (US$)</label>
-      <input id="stValue" type="number" min="0" step="1000" value="${cur.value||""}" placeholder="ex: 450000">
+      <label>Value won (US$)</label>
+      <input id="stValue" type="number" min="0" step="1000" value="${cur.value||""}" placeholder="e.g. 450000">
     </div>
     <div class="row">
-      <button class="btn" onclick="closeStatusModal()">Cancelar</button>
-      <button class="btn btn-accent" id="stSave">Salvar</button>
+      <button class="btn" onclick="closeStatusModal()">Cancel</button>
+      <button class="btn btn-accent" id="stSave">Save</button>
     </div>
     <div class="saved-note" id="stNote"></div>
   `;
@@ -838,7 +838,7 @@ async function saveStatusUpdate(url){
   const value = status==="won" && valueRaw ? Number(valueRaw) : null;
   const note = document.getElementById("stNote");
   const saveBtn = document.getElementById("stSave");
-  saveBtn.disabled = true; saveBtn.textContent = "Salvando...";
+  saveBtn.disabled = true; saveBtn.textContent = "Saving...";
   try{
     const res = await fetch("/api/status", {
       method: "POST",
@@ -847,14 +847,14 @@ async function saveStatusUpdate(url){
     });
     if(!res.ok) throw new Error(await res.text());
     statusMap = await res.json();
-    note.textContent = "Salvo ✓";
-    window.__kpiAnimated = true; // nao re-anima os KPIs num update pontual
+    note.textContent = "Saved ✓";
+    window.__kpiAnimated = true; // don't re-animate the KPIs on a one-off update
     render();
     setTimeout(closeStatusModal, 500);
   }catch(e){
     note.style.color = "var(--red)";
-    note.textContent = "Erro ao salvar -- tenta de novo.";
-    saveBtn.disabled = false; saveBtn.textContent = "Salvar";
+    note.textContent = "Couldn't save -- try again.";
+    saveBtn.disabled = false; saveBtn.textContent = "Save";
     console.error(e);
   }
 }
